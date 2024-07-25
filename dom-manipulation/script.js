@@ -180,7 +180,7 @@ async function syncQuotes() {
 
         saveQuotes();
         populateCategories();
-        alert('Quotes synced with server successfully!');
+        alert('Quotes synced with server!');
 }
 
 //Periodically sync with server
