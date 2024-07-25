@@ -94,6 +94,7 @@ document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 document.getElementById('addQuote').addEventListener('click', createAddQuoteForm);
 
 document.getElementById('exportQuotes').addEventListener('change', importFromJsonFile);
+document.getElementById('importFile').addEventListener('change', importFromJsonFile);
 
 //Initial call to display a random quote on page load
 showRandomQuote();
