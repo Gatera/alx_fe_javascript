@@ -136,11 +136,36 @@ function importFromJsonFile(event) {
     fileReader.readAsText(event.target.files[0]);
 }
 
-//Function to sync quotes with server
-async function syncQuotesWithServer() {
+//Function to fetch quotes from server
+async function fetchQuotesFromServer() {
     try {
         const response = await fetch(SERVER_URL);
         const serverQuotes = await response.json();
+        return serverQuotes;
+    } catch (error) {
+        console.error("Error fetching quotes from server", error);
+        return [];
+    }
+}
+
+//Function to post quotes to server
+async function postQuotesToServer(quote) {
+    try {
+        await fetch(SERVER_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(quote)
+        });
+    } catch (error) {
+        console.error("Error posting quote to server:", error);
+    }
+}
+
+//Function to sync quotes with server
+async function syncQuotes() {
+        const serverQuotes = await fetchQuotesFromServer();
 
         //Simple conflict resolution: server data takes precedence
         serverQuotes.forEach(serverQuote => {
@@ -156,9 +181,6 @@ async function syncQuotesWithServer() {
         saveQuotes();
         populateCategories();
         alert('Quotes synced with server successfully!');
-    } catch (error) {
-        console.error('Error syncing quotes with server:', error);        
-    }
 }
 
 //Periodically sync with server
