@@ -1,5 +1,5 @@
-// Initial array of quotes
-let quotes = [
+// Initial array of quotes, loaded from local storage if available
+let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     {
         text: "The only limit to our realization of tomorrow is our doubts of today.",
         category: "Motivation"
@@ -14,12 +14,19 @@ let quotes = [
     }
 ];
 
+//Function to save quote to local storage
+function saveQuotes() {
+    localStorage.setItem('quotes', JSON.stringify(quotes));
+}
+
 //Function to display a random quote
 function showRandomQuote() {
     const randomIndex = Math.floor(Math.random() * quotes.length);
     const quote = quotes[randomIndex];
     const quoteDisplay = document.getElementById('quoteDisplay');
     quoteDisplay.innerHTML = `<p>${quote.text}</p><p><em>- ${quote.category}</em></p>`;
+
+    sessionStorage.setItem('lastQuote', JSON.stringify(quote)); //Save the last viewed quote to session storage
 }
 
 //Function to add a new quote
@@ -56,9 +63,45 @@ function createAddQuoteForm() {
     document.getElementById('addQuoteButton').addEventListener('click', addQuote);
 }
 
+//Function to export quotes as JSON
+function exportQuotesToJson() {
+    const dataStr = JSON.stringify(quotes, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'quotes.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+//Function to import quotes from JSON file
+function importFromJsonFile(event) {
+    const fileReader = new FileReader();
+    fileReader.onload = function(event) {
+        const importedQuotes = JSON.parse(event.target.result);
+        quotes.push(...importedQuotes);
+        saveQuotes();
+        alert("Quotes imported successfully!");
+    };
+    fileReader.readAsText(event.target.files[0]);
+}
+
 // Event listeners for buttons
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 document.getElementById('addQuote').addEventListener('click', createAddQuoteForm);
 
+document.getElementById('exportQuotes').addEventListener('change', importFromJsonFile);
+
 //Initial call to display a random quote on page load
 showRandomQuote();
+
+//Load the last viewed quote from session storage if available
+const lastQuote = JSON.parse(sessionStorage.getItem('lastQuote'));
+
+if (lastQuote) {
+    const quoteDisplay = document.getElementById('quoteDisplay');
+    quoteDisplay.innerHTML = `<p>${lastQuote.text}</p><p><em>- ${lastQuote.category}</em></p>`;
+}
