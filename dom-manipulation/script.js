@@ -1,3 +1,5 @@
+const SERVER_URL = 'https://jsonplaceholder.typicode.com/posts'; //Mock API endpoint for demonstration
+
 // Initial array of quotes, loaded from local storage if available
 let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     {
@@ -133,6 +135,34 @@ function importFromJsonFile(event) {
     };
     fileReader.readAsText(event.target.files[0]);
 }
+
+//Function to sync quotes with server
+async function syncQuotesWithServer() {
+    try {
+        const response = await fetch(SERVER_URL);
+        const serverQuotes = await response.json();
+
+        //Simple conflict resolution: server data takes precedence
+        serverQuotes.forEach(serverQuote => {
+            const existingQuoteIndex = quotes.findIndex(quote => quote.text === serverQuote.text);
+
+            if (existingQuoteIndex !== -1) {
+                quotes[existingQuoteIndex] = serverQuote;
+            } else {
+                quotes.push(serverQuote);
+            }
+        });
+
+        saveQuotes();
+        populateCategories();
+        alert('Quotes synced with server successfully!');
+    } catch (error) {
+        console.error('Error syncing quotes with server:', error);        
+    }
+}
+
+//Periodically sync with server
+setInterval(syncQuotesWithServer, 60000); // Every 60 seconds
 
 // Event listeners for buttons
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
